@@ -1,0 +1,21 @@
+version: 2
+
+sources:
+  - name: source
+    database: dbt_tutorial_dev
+    tables:
+      - name: dim_store
+        description: "This table contains store data."
+      - name: dim_date
+        description: "This table contains dimension date"  
+      - name: fact_returns
+        description: "This table contains return data."
+      - name: fact_sales
+        description: "This table contains sales data."
+      - name: dim_product
+        description: "This table contains product data."
+      - name: dim_customer
+        description: "This table contains customer data."
+      - name: items
+        description: "This table contains items data."
+        

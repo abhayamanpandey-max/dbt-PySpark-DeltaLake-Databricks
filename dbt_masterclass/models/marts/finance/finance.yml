@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: fin_daily_sales_summary
+    description: >
+      Daily revenue summary by store, aggregating fct_sales with date and
+      store dimension attributes. Intended as a finance-facing reporting mart.
+    columns:
+      - name: date_sk
+        data_tests:
+          - not_null
+      - name: store_sk
+        data_tests:
+          - not_null
+      - name: net_revenue_after_returns
+        description: Net revenue for the day at this store, after refunds.
+        data_tests:
+          - not_null

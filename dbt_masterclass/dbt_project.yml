@@ -1,0 +1,59 @@
+name: 'dbt_masterclass'
+version: '1.0.0'
+config-version: 2
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'dbt_masterclass'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Seed configuration — load the raw star-schema CSVs into a "seeds" schema
+seeds:
+  dbt_masterclass:
+    +schema: seeds
+    fact_sales:
+      +column_types:
+        sales_id: bigint
+        date_sk: int
+        store_sk: int
+        product_sk: int
+        customer_sk: int
+        promotion_sk: int
+        quantity: int
+        unit_price: decimal(10,2)
+        gross_amount: decimal(10,2)
+        discount_amount: decimal(10,2)
+        net_amount: decimal(10,2)
+    fact_returns:
+      +column_types:
+        sales_id: bigint
+        date_sk: int
+        store_sk: int
+        product_sk: int
+        returned_qty: int
+        refund_amount: decimal(10,2)
+
+# Model layer configuration
+# staging  -> 1:1 cleaned views over the raw seed data (views, cheap, always fresh)
+# marts    -> business-facing dims/facts, built as tables for performance
+models:
+  dbt_masterclass:
+    staging:
+      +materialized: view
+      +schema: staging
+    marts:
+      +materialized: table
+      +schema: marts
+      core:
+        +tags: ['core']
+      finance:
+        +tags: ['finance']

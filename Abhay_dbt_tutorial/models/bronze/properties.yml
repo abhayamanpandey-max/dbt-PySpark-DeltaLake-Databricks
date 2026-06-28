@@ -1,0 +1,204 @@
+version: 2
+
+models:
+  - name: bronze_customer
+    description: "Raw customer dimension data ingested as-is from the source system, no transformations applied."
+    columns:
+      - name: customer_sk
+        description: "Surrogate key uniquely identifying each customer record."
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_code
+        description: "Business/natural key for the customer from the source system."
+        data_tests:
+          - not_null
+      - name: first_name
+        description: "Customer's first name."
+      - name: last_name
+        description: "Customer's last name."
+      - name: gender
+        description: "Customer's gender as recorded in the source system."
+      - name: email
+        description: "Customer's email address."
+        data_tests:
+          - not_null
+      - name: phone
+        description: "Customer's phone number."
+      - name: loyalty_tier
+        description: "Loyalty program tier assigned to the customer (e.g., Gold, Silver, Bronze)."
+      - name: signup_date
+        description: "Date the customer signed up / joined."
+
+  - name: bronze_date
+    description: "Raw date dimension data ingested as-is from the source system, no transformations applied."
+    columns:
+      - name: date_sk
+        description: "Surrogate key uniquely identifying each date record."
+        data_tests:
+          - unique
+          - not_null
+      - name: date
+        description: "Calendar date value."
+        data_tests:
+          - not_null
+      - name: day
+        description: "Day of the month (1-31)."
+      - name: month
+        description: "Month number (1-12)."
+      - name: month_name
+        description: "Full name of the month (e.g., January)."
+      - name: quarter
+        description: "Calendar quarter (1-4)."
+      - name: year
+        description: "Calendar year."
+      - name: day_of_week
+        description: "Numeric representation of the day of the week."
+      - name: day_name
+        description: "Full name of the day of the week (e.g., Monday)."
+      - name: is_weekend
+        description: "Boolean flag indicating whether the date falls on a weekend."
+      - name: is_month_end
+        description: "Boolean flag indicating whether the date is the last day of the month."
+      - name: is_month_start
+        description: "Boolean flag indicating whether the date is the first day of the month."
+      - name: is_quarter_end
+        description: "Boolean flag indicating whether the date is the last day of the quarter."
+      - name: is_quarter_start
+        description: "Boolean flag indicating whether the date is the first day of the quarter."
+
+  - name: bronze_product
+    description: "Raw product dimension data ingested as-is from the source system, no transformations applied."
+    columns:
+      - name: product_sk
+        description: "Surrogate key uniquely identifying each product record."
+        data_tests:
+          - unique
+          - not_null
+      - name: product_code
+        description: "Business/natural key for the product from the source system."
+        data_tests:
+          - not_null
+      - name: product_name
+        description: "Name of the product."
+        data_tests:
+          - not_null
+      - name: department
+        description: "Department the product belongs to (e.g., Electronics, Apparel)."
+      - name: category
+        description: "Category classification of the product within its department."
+      - name: supplier_sk
+        description: "Surrogate key referencing the supplier of the product."
+      - name: list_price
+        description: "Standard listed price of the product."
+      - name: uom
+        description: "Unit of measure for the product (e.g., each, kg, liter)."
+
+  - name: bronze_returns
+    description: "Raw sales returns fact data ingested as-is from the source system, no transformations applied."
+    columns:
+      - name: sales_id
+        description: "Reference to the original sales transaction being returned."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('bronze_sales')
+                field: sales_id
+      - name: date_sk
+        description: "Surrogate key referencing the date the return occurred."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('bronze_date')
+                field: date_sk
+      - name: store_sk
+        description: "Surrogate key referencing the store where the return was processed."
+      - name: product_sk
+        description: "Surrogate key referencing the product that was returned."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('bronze_product')
+                field: product_sk
+      - name: returned_qty
+        description: "Quantity of the product returned."
+      - name: return_reason
+        description: "Reason provided for the return (e.g., defective, wrong size)."
+      - name: refund_amount
+        description: "Monetary amount refunded to the customer for this return."
+
+  - name: bronze_sales
+    description: "Raw sales fact data ingested as-is from the source system, no transformations applied."
+    columns:
+      - name: sales_id
+        description: "Unique identifier for each sales transaction."
+        data_tests:
+          - unique
+          - not_null
+      - name: date_sk
+        description: "Surrogate key referencing the date the sale occurred."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('bronze_date')
+                field: date_sk
+      - name: store_sk
+        description: "Surrogate key referencing the store where the sale took place."
+      - name: product_sk
+        description: "Surrogate key referencing the product sold."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('bronze_product')
+                field: product_sk
+      - name: customer_sk
+        description: "Surrogate key referencing the customer who made the purchase."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('bronze_customer')
+                field: customer_sk
+      - name: promotion_sk
+        description: "Surrogate key referencing any promotion applied to the sale."
+      - name: quantity
+        description: "Number of units sold in the transaction."
+      - name: unit_price
+        description: "Price per unit of the product at the time of sale."
+      - name: gross_amount
+        description: "Total sale amount before any discounts (quantity × unit_price)."
+      - name: discount_amount
+        description: "Total discount applied to the transaction."
+      - name: net_amount
+        description: "Final sale amount after discounts (gross_amount - discount_amount)."
+      - name: payment_method
+        description: "Method of payment used for the transaction (e.g., credit card, cash)."
+
+  - name: bronze_store
+    description: "Raw store dimension data ingested as-is from the source system, no transformations applied."
+    columns:
+      - name: store_sk
+        description: "Surrogate key uniquely identifying each store record."
+        data_tests:
+          - unique
+          - not_null
+      - name: store_code
+        description: "Business/natural key for the store from the source system."
+        data_tests:
+          - not_null
+      - name: store_name
+        description: "Name of the store."
+      - name: city
+        description: "City where the store is located."
+      - name: state_province
+        description: "State or province where the store is located."
+      - name: region
+        description: "Geographic region the store belongs to."
+      - name: country
+        description: "Country where the store is located."
+      - name: open_date
+        description: "Date the store was opened."
+      - name: sq_ft
+        description: "Total square footage of the store."

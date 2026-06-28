@@ -1,0 +1,74 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: Customer dimension. One row per customer.
+    columns:
+      - name: customer_sk
+        data_tests:
+          - unique
+          - not_null
+
+  - name: dim_products
+    description: Product dimension. One row per product.
+    columns:
+      - name: product_sk
+        data_tests:
+          - unique
+          - not_null
+
+  - name: dim_stores
+    description: Store dimension. One row per store location.
+    columns:
+      - name: store_sk
+        data_tests:
+          - unique
+          - not_null
+
+  - name: dim_dates
+    description: Date dimension. One row per calendar day.
+    columns:
+      - name: date_sk
+        data_tests:
+          - unique
+          - not_null
+
+  - name: fct_sales
+    description: >
+      Central sales fact table. One row per sales transaction line, enriched
+      with aggregated return information for that same sales_id (if any).
+    columns:
+      - name: sales_id
+        description: Primary key for a sales line item.
+        data_tests:
+          - unique
+          - not_null
+      - name: net_amount_after_returns
+        description: Net sale amount minus any refunds issued against this line.
+        data_tests:
+          - not_null
+          - non_negative
+      - name: date_sk
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_dates')
+                field: date_sk
+      - name: store_sk
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_stores')
+                field: store_sk
+      - name: product_sk
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: product_sk
+      - name: customer_sk
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_sk
